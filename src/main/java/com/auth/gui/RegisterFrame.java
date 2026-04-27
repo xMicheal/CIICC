@@ -24,7 +24,7 @@ public class RegisterFrame extends JFrame {
         JPasswordField password = new JPasswordField();
         password.setBounds(120, 100, 140, 25);
 
-        JTextField pin = new JTextField();
+        JPasswordField pin = new JPasswordField();
         pin.setBounds(120, 140, 140, 25);
 
         add(new JLabel("Username")).setBounds(20, 20, 80, 25);
@@ -53,7 +53,7 @@ public class RegisterFrame extends JFrame {
             );
 
             JOptionPane.showMessageDialog(this,
-                    success ? "Registered successfully!" : "Registration failed.");
+                    success ? "Registered successfully!" : "Registration failed, User already exist");
         });
 
         setVisible(true);

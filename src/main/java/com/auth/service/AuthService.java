@@ -9,16 +9,16 @@ import java.sql.ResultSet;
 
 public class AuthService {
 
-    // -----------------------------
-    // PIN VALIDATION (4 digits only)
-    // -----------------------------
+
+    // PIN VALIDATION
+
     private boolean isValidPin(String pin) {
         return pin != null && pin.matches("\\d{4}");
     }
 
-    // -----------------------------
+
     // REGISTER USER
-    // -----------------------------
+
     public boolean register(String username, String email, String password, String pin) {
 
         if (!isValidPin(pin)) {
@@ -65,9 +65,9 @@ public class AuthService {
         return false;
     }
 
-    // -----------------------------
+
     // LOGIN USER
-    // -----------------------------
+
     public boolean login(String username, String password, String pin) {
 
         String query =
