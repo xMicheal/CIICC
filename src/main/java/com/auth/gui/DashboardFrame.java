@@ -3,12 +3,12 @@ package com.auth.gui;
 import com.auth.service.BankingService;
 import com.auth.session.SessionManager;
 import javax.swing.*;
-
+import com.auth.service.AccountService;
 public class DashboardFrame extends JFrame {
 
     private BankingService bankingService = new BankingService();
     private JLabel balanceLabel;
-
+    private AccountService accountService = new AccountService();
     public DashboardFrame() {
 
         setTitle("Dashboard");
@@ -38,6 +38,10 @@ public class DashboardFrame extends JFrame {
         logoutBtn.setBounds(90, 180, 120, 30);
         add(logoutBtn);
 
+        JButton transferBtn = new JButton("Transfer");
+        transferBtn.setBounds(20, 140, 120, 30);
+        add(transferBtn);
+
         updateBalance();
 
         depositBtn.addActionListener(e -> {
@@ -66,6 +70,89 @@ public class DashboardFrame extends JFrame {
             new LoginFrame();
         });
 
+
+        transferBtn.addActionListener(e -> {
+
+            String toUser = JOptionPane.showInputDialog("Enter recipient username:");
+
+            if (toUser == null || toUser.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Recipient is required");
+                return;
+            }
+
+            if (!bankingService.userExists(toUser)) {
+                JOptionPane.showMessageDialog(this, "User does not exist");
+                return;
+            }
+
+            String amountStr = JOptionPane.showInputDialog("Enter amount:");
+
+            if (amountStr == null || amountStr.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Amount is required");
+                return;
+            }
+
+            try {
+                double amount = Double.parseDouble(amountStr);
+
+                //  PIN INPUT (hidden)
+                JPasswordField pinField = new JPasswordField();
+
+                int option = JOptionPane.showConfirmDialog(
+                        this,
+                        pinField,
+                        "Enter PIN to confirm",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.PLAIN_MESSAGE
+                );
+
+                if (option != JOptionPane.OK_OPTION) {
+                    JOptionPane.showMessageDialog(this, "Transfer cancelled");
+                    return;
+                }
+
+                String pin = new String(pinField.getPassword());
+
+                boolean pinValid = accountService.verifyPin(
+                        SessionManager.getCurrentUser(),
+                        pin
+                );
+
+                if (!pinValid) {
+                    JOptionPane.showMessageDialog(this, "Invalid PIN");
+                    return;
+                }
+
+                // 🔥 FINAL CONFIRMATION
+                int confirm = JOptionPane.showConfirmDialog(
+                        this,
+                        "Send " + amount + " to " + toUser + "?",
+                        "Confirm Transfer",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+                if (confirm != JOptionPane.YES_OPTION) {
+                    JOptionPane.showMessageDialog(this, "Transfer cancelled");
+                    return;
+                }
+
+                // 💸 EXECUTE TRANSFER
+                boolean success = bankingService.transfer(
+                        SessionManager.getCurrentUser(),
+                        toUser,
+                        amount
+                );
+
+                JOptionPane.showMessageDialog(this,
+                        success ? "Transfer successful"
+                                : "Transfer failed (insufficient balance)");
+
+                updateBalance();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid amount input");
+            }
+        });
         setVisible(true);
     }
 

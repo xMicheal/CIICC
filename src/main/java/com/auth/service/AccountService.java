@@ -93,6 +93,7 @@ public class AccountService {
         return false;
     }
 
+
     // Transfer Pin verification
     public boolean verifyPin(String username, String pin) {
 
@@ -112,7 +113,6 @@ public class AccountService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 }
