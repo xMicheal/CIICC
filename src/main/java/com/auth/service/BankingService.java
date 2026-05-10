@@ -82,7 +82,7 @@ public class BankingService {
     }
     public boolean transfer(String fromUser, String toUser, double amount) {
 
-        // 🔴 Basic validation
+        //  validation
         if (fromUser == null || toUser == null || fromUser.equals(toUser) || amount <= 0) {
             return false;
         }
@@ -147,17 +147,21 @@ public class BankingService {
             //  Log transactions
 
             PreparedStatement logOut = conn.prepareStatement(
-                    "INSERT INTO transactions (username, type, amount) VALUES (?, 'TRANSFER_OUT', ?)"
+                    "INSERT INTO transactions (username, target_user, type, amount) VALUES (?, ?, 'TRANSFER_OUT', ?)"
             );
+
             logOut.setString(1, fromUser);
-            logOut.setDouble(2, amount);
+            logOut.setString(2, toUser);
+            logOut.setDouble(3, amount);
             logOut.executeUpdate();
 
             PreparedStatement logIn = conn.prepareStatement(
-                    "INSERT INTO transactions (username, type, amount) VALUES (?, 'TRANSFER_IN', ?)"
+                    "INSERT INTO transactions (username, target_user, type, amount) VALUES (?, ?, 'TRANSFER_IN', ?)"
             );
+
             logIn.setString(1, toUser);
-            logIn.setDouble(2, amount);
+            logIn.setString(2, fromUser);
+            logIn.setDouble(3, amount);
             logIn.executeUpdate();
 
             conn.commit();
@@ -187,5 +191,86 @@ public class BankingService {
         }
 
         return false;
+    }
+    public String viewAllTransactions() {
+
+        StringBuilder history = new StringBuilder();
+
+        String query =
+                "SELECT username, target_user, type, amount, created_at " +
+                        "FROM transactions " +
+                        "ORDER BY created_at DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+
+                history.append("User: ")
+                        .append(rs.getString("username"));
+
+                String target = rs.getString("target_user");
+
+                if (target != null) {
+                    history.append(" -> ").append(target);
+                }
+
+                history.append(" | ")
+                        .append(rs.getString("type"))
+                        .append(" | ₱")
+                        .append(rs.getDouble("amount"))
+                        .append(" | ")
+                        .append(rs.getTimestamp("created_at"))
+                        .append("\n");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return history.toString();
+    }
+    public String viewUserTransactions(String username) {
+
+        StringBuilder history = new StringBuilder();
+
+        String query =
+                "SELECT username, target_user, type, amount, created_at " +
+                        "FROM transactions " +
+                        "WHERE username = ? " +
+                        "ORDER BY created_at DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, username);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+
+                history.append("Type: ")
+                        .append(rs.getString("type"));
+
+                String target = rs.getString("target_user");
+
+                if (target != null) {
+                    history.append(" | User: ")
+                            .append(target);
+                }
+
+                history.append(" | ₱")
+                        .append(rs.getDouble("amount"))
+                        .append(" | ")
+                        .append(rs.getTimestamp("created_at"))
+                        .append("\n");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return history.toString();
     }
 }

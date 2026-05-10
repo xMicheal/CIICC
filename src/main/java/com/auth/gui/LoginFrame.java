@@ -79,6 +79,7 @@ public class LoginFrame extends JFrame {
             new RegisterFrame();
         });
 
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 }

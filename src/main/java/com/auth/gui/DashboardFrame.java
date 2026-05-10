@@ -12,35 +12,51 @@ public class DashboardFrame extends JFrame {
     public DashboardFrame() {
 
         setTitle("Dashboard");
-        setSize(300, 300);
+        setSize(400, 400);
         setLayout(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         String user = SessionManager.getCurrentUser();
 
+// Welcome label
         JLabel welcome = new JLabel("Welcome, " + user);
-        welcome.setBounds(20, 20, 200, 25);
+        welcome.setBounds(20, 20, 250, 25);
         add(welcome);
 
+// Balance label
         balanceLabel = new JLabel();
-        balanceLabel.setBounds(20, 60, 200, 25);
+        balanceLabel.setBounds(20, 55, 250, 25);
         add(balanceLabel);
 
+// Deposit button
         JButton depositBtn = new JButton("Deposit");
-        depositBtn.setBounds(20, 100, 120, 30);
+        depositBtn.setBounds(20, 100, 150, 35);
         add(depositBtn);
 
+// Withdraw button
         JButton withdrawBtn = new JButton("Withdraw");
-        withdrawBtn.setBounds(160, 100, 120, 30);
+        withdrawBtn.setBounds(200, 100, 150, 35);
         add(withdrawBtn);
 
-        JButton logoutBtn = new JButton("Logout");
-        logoutBtn.setBounds(90, 180, 120, 30);
-        add(logoutBtn);
-
+// Transfer button
         JButton transferBtn = new JButton("Transfer");
-        transferBtn.setBounds(20, 140, 120, 30);
+        transferBtn.setBounds(20, 150, 150, 35);
         add(transferBtn);
+
+// My Transactions button
+        JButton myTransactionsBtn = new JButton("My Transactions");
+        myTransactionsBtn.setBounds(20, 200, 150, 35);
+        add(myTransactionsBtn);
+
+// All Transactions button
+        JButton allTransactionsBtn = new JButton("All Transactions");
+        allTransactionsBtn.setBounds(200, 200, 150, 35);
+        add(allTransactionsBtn);
+
+// Logout button
+        JButton logoutBtn = new JButton("Logout");
+        logoutBtn.setBounds(110, 280, 150, 35);
+        add(logoutBtn);
 
         updateBalance();
 
@@ -70,6 +86,45 @@ public class DashboardFrame extends JFrame {
             new LoginFrame();
         });
 
+        myTransactionsBtn.addActionListener(e -> {
+
+            String history = bankingService.viewUserTransactions(
+                    SessionManager.getCurrentUser()
+            );
+
+            JTextArea area = new JTextArea(history);
+            area.setEditable(false);
+
+            JScrollPane scrollPane = new JScrollPane(area);
+
+            scrollPane.setPreferredSize(new java.awt.Dimension(500, 300));
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    scrollPane,
+                    "My Transactions",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        });
+
+        allTransactionsBtn.addActionListener(e -> {
+
+            String history = bankingService.viewAllTransactions();
+
+            JTextArea area = new JTextArea(history);
+            area.setEditable(false);
+
+            JScrollPane scrollPane = new JScrollPane(area);
+
+            scrollPane.setPreferredSize(new java.awt.Dimension(500, 300));
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    scrollPane,
+                    "All Transactions",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        });
 
         transferBtn.addActionListener(e -> {
 
@@ -123,7 +178,7 @@ public class DashboardFrame extends JFrame {
                     return;
                 }
 
-                // 🔥 FINAL CONFIRMATION
+                // FINAL CONFIRMATION
                 int confirm = JOptionPane.showConfirmDialog(
                         this,
                         "Send " + amount + " to " + toUser + "?",
@@ -136,7 +191,7 @@ public class DashboardFrame extends JFrame {
                     return;
                 }
 
-                // 💸 EXECUTE TRANSFER
+                // EXECUTE TRANSFER
                 boolean success = bankingService.transfer(
                         SessionManager.getCurrentUser(),
                         toUser,
@@ -153,6 +208,8 @@ public class DashboardFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Invalid amount input");
             }
         });
+
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
