@@ -55,7 +55,7 @@ public class RegisterFrame extends JFrame {
             JOptionPane.showMessageDialog(this,
                     success ? "Registered successfully!" : "Registration failed, User already exist");
         });
-
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 }
